@@ -1,22 +1,9 @@
+import Sidebar from "../components/Sidebar";
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-slate-950 text-white flex">
       {/* Sidebar */}
-      <aside className="w-64 border-r border-slate-800 p-6">
-        <h1 className="text-2xl font-bold mb-10">
-          🚀 ShipFlow AI
-        </h1>
-
-        <nav className="space-y-4">
-          <div>Dashboard</div>
-          <div>Workspaces</div>
-          <div>Projects</div>
-          <div>Feature Requests</div>
-          <div>PRDs</div>
-          <div>Tasks</div>
-          <div>Reviews</div>
-        </nav>
-      </aside>
+      <Sidebar />
 
       {/* Main Content */}
       <main className="flex-1 p-8">
