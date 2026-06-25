@@ -1,4 +1,5 @@
 "use client";
+import { clarificationAction } from "../../../actions/clarification";
 import { useState } from "react";
 import {
   generatePRDAction,
@@ -13,6 +14,8 @@ export default function FeatureRequestsPage() {
   const [tasks, setTasks] = useState<string[]>([]);
 
   const [loading, setLoading] = useState(false);
+  const [questions, setQuestions] = useState("");
+const [answers, setAnswers] = useState("");
   function parseTasks(markdown: string): string[] {
   return markdown
     .split("\n")
@@ -64,18 +67,46 @@ export default function FeatureRequestsPage() {
               className="w-full p-3 rounded-lg bg-slate-800 border border-slate-700"
             />
           </div>
-
-        <button
+          <button
   onClick={async () => {
-    if (!title || !description) {
-      alert("Please enter title and description.");
-      return;
-    }
+    setLoading(true);
 
     try {
-      setLoading(true);
+      const result = await clarificationAction(
+        title,
+        description
+      );
 
-      const result = await generatePRDAction(title, description);
+      setQuestions(result ?? "");
+    } finally {
+      setLoading(false);
+    }
+  }}
+  className="px-5 py-3 rounded-lg bg-purple-600 hover:bg-purple-700"
+>
+  {loading ? "Thinking..." : "Ask AI"}
+</button>
+
+   <button
+  onClick={async () => {
+    setLoading(true);
+
+    try {
+      const finalDescription =
+        questions && questions !== "READY_FOR_PRD"
+          ? `${description}
+
+AI Questions:
+${questions}
+
+User Answers:
+${answers}`
+          : description;
+
+      const result = await generatePRDAction(
+        title,
+        finalDescription
+      );
 
       setPrd(result ?? "");
     } catch (error) {
@@ -89,44 +120,66 @@ export default function FeatureRequestsPage() {
   className="px-5 py-3 bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50"
 >
   {loading ? "Generating..." : "Generate PRD"}
-</button>
+</button> 
         </div>
       </div>
+      {questions && (
+  <div className="mt-6 rounded-xl bg-slate-900 p-6">
 
-      {prd && (
-        <div className="mt-6 bg-slate-900 p-6 rounded-xl">
-          <h2 className="text-2xl font-bold mb-4">
-            Generated PRD
-          </h2>
+    <h2 className="text-2xl font-bold mb-4">
+      AI Clarification
+    </h2>
 
-          <pre className="whitespace-pre-wrap text-slate-300">
-            {prd}
-            <button
-  onClick={async () => {
-    try {
-      setLoading(true);
+    <pre className="whitespace-pre-wrap text-slate-300">
+      {questions}
+    </pre>
 
-      const markdown = await generateTasksAction(prd);
+    {questions !== "READY_FOR_PRD" && (
+      <textarea
+        value={answers}
+        onChange={(e) => setAnswers(e.target.value)}
+        placeholder="Answer the questions here..."
+        rows={6}
+        className="mt-4 w-full rounded-lg border border-slate-700 bg-slate-800 p-3"
+      />
+    )}
 
-      const parsedTasks = parseTasks(markdown ?? "");
+  </div>
+)}
+{prd && (
+  <div className="mt-6 bg-slate-900 p-6 rounded-xl">
+    <h2 className="text-2xl font-bold mb-4">
+      Generated PRD
+    </h2>
 
-      setTasks(parsedTasks);
-    } catch (error) {
-      console.error(error);
-      alert("Failed to generate tasks.");
-    } finally {
-      setLoading(false);
-    }
-  }}
-  disabled={loading}
-  className="mt-4 px-5 py-3 bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50"
->
-  {loading ? "Generating..." : "Generate Tasks"}
-</button>
-          </pre>
-        </div>
-      )}
+    <pre className="whitespace-pre-wrap text-slate-300">
+      {prd}
+    </pre>
 
+    <button
+      onClick={async () => {
+        try {
+          setLoading(true);
+
+          const markdown = await generateTasksAction(prd);
+
+          const parsedTasks = parseTasks(markdown ?? "");
+
+          setTasks(parsedTasks);
+        } catch (error) {
+          console.error(error);
+          alert("Failed to generate tasks.");
+        } finally {
+          setLoading(false);
+        }
+      }}
+      disabled={loading}
+      className="mt-4 px-5 py-3 bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50"
+    >
+      {loading ? "Generating..." : "Generate Tasks"}
+    </button>
+  </div>
+)}
       {tasks.length > 0 && (
         <div className="mt-6">
           <h2 className="text-2xl font-bold mb-4">
