@@ -1,6 +1,9 @@
 "use client";
 import { useState } from "react";
-import { generatePRDAction } from "../../../actions/feature";
+import {
+  generatePRDAction,
+  generateTasksAction,
+} from "../../../actions/feature";
 
 export default function FeatureRequestsPage() {
   const [title, setTitle] = useState("");
@@ -10,7 +13,17 @@ export default function FeatureRequestsPage() {
   const [tasks, setTasks] = useState<string[]>([]);
 
   const [loading, setLoading] = useState(false);
-
+  function parseTasks(markdown: string): string[] {
+  return markdown
+    .split("\n")
+    .filter((line) => line.trim().startsWith("-"))
+    .map((line) =>
+      line
+        .replace("- [ ]", "")
+        .replace("- ", "")
+        .trim()
+    );
+}
   return (
     <div className="max-w-6xl">
       <h1 className="text-4xl font-bold">
@@ -88,22 +101,29 @@ export default function FeatureRequestsPage() {
 
           <pre className="whitespace-pre-wrap text-slate-300">
             {prd}
-          </pre>
+            <button
+  onClick={async () => {
+    try {
+      setLoading(true);
 
-          <button
-            onClick={() => {
-              setTasks([
-                "Design dark mode UI",
-                "Create theme context",
-                "Implement toggle button",
-                "Store user preference",
-                "Write tests",
-              ]);
-            }}
-            className="mt-4 px-5 py-3 bg-green-600 rounded-lg hover:bg-green-700"
-          >
-            Generate Tasks
-          </button>
+      const markdown = await generateTasksAction(prd);
+
+      const parsedTasks = parseTasks(markdown ?? "");
+
+      setTasks(parsedTasks);
+    } catch (error) {
+      console.error(error);
+      alert("Failed to generate tasks.");
+    } finally {
+      setLoading(false);
+    }
+  }}
+  disabled={loading}
+  className="mt-4 px-5 py-3 bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50"
+>
+  {loading ? "Generating..." : "Generate Tasks"}
+</button>
+          </pre>
         </div>
       )}
 
