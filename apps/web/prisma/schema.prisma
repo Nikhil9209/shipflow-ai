@@ -22,9 +22,8 @@ model Workspace {
   id          String    @id @default(cuid())
   name        String
 
-  ownerId     String
-  owner       User      @relation(fields: [ownerId], references: [id])
-
+  ownerId     String?
+  owner       User?     @relation(fields: [ownerId], references: [id])
   projects    Project[]
 
   createdAt   DateTime  @default(now())

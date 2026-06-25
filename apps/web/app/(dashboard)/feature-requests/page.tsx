@@ -1,10 +1,15 @@
 "use client";
-
 import { useState } from "react";
+import { generatePRDAction } from "../../../actions/feature";
 
 export default function FeatureRequestsPage() {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+
   const [prd, setPrd] = useState("");
   const [tasks, setTasks] = useState<string[]>([]);
+
+  const [loading, setLoading] = useState(false);
 
   return (
     <div className="max-w-6xl">
@@ -24,11 +29,13 @@ export default function FeatureRequestsPage() {
               Feature Title
             </label>
 
-            <input
-              type="text"
-              placeholder="Enter feature title"
-              className="w-full p-3 rounded-lg bg-slate-800 border border-slate-700"
-            />
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Enter feature title"
+            className="w-full p-3 rounded-lg bg-slate-800 border border-slate-700"
+          />
           </div>
 
           <div>
@@ -36,36 +43,40 @@ export default function FeatureRequestsPage() {
               Description
             </label>
 
-            <textarea
+          <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
               placeholder="Describe your feature..."
               rows={6}
               className="w-full p-3 rounded-lg bg-slate-800 border border-slate-700"
             />
           </div>
 
-          <button
-            onClick={() => {
-              setPrd(`
-# Product Requirements Document
+        <button
+  onClick={async () => {
+    if (!title || !description) {
+      alert("Please enter title and description.");
+      return;
+    }
 
-## Overview
-This feature will allow users to enable dark mode across the application.
+    try {
+      setLoading(true);
 
-## Goals
-- Improve user experience
-- Reduce eye strain
-- Support modern UI preferences
+      const result = await generatePRDAction(title, description);
 
-## Acceptance Criteria
-- User can toggle dark mode
-- Preference is saved
-- UI updates instantly
-`);
-            }}
-            className="px-5 py-3 bg-blue-600 rounded-lg hover:bg-blue-700"
-          >
-            Generate PRD
-          </button>
+      setPrd(result ?? "");
+    } catch (error) {
+      console.error(error);
+      alert("Failed to generate PRD");
+    } finally {
+      setLoading(false);
+    }
+  }}
+  disabled={loading}
+  className="px-5 py-3 bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+>
+  {loading ? "Generating..." : "Generate PRD"}
+</button>
         </div>
       </div>
 
