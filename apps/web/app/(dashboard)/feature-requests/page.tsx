@@ -6,6 +6,8 @@ import {
   generateTasksAction,
 } from "../../../actions/feature";
 
+import { createFeatureRequest } from "../../../actions/feature-request";
+
 export default function FeatureRequestsPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -16,6 +18,7 @@ export default function FeatureRequestsPage() {
   const [loading, setLoading] = useState(false);
   const [questions, setQuestions] = useState("");
 const [answers, setAnswers] = useState("");
+const [featureId, setFeatureId] = useState("");
   function parseTasks(markdown: string): string[] {
   return markdown
     .split("\n")
@@ -27,6 +30,8 @@ const [answers, setAnswers] = useState("");
         .trim()
     );
 }
+
+
   return (
     <div className="max-w-6xl">
       <h1 className="text-4xl font-bold">
@@ -92,6 +97,13 @@ const [answers, setAnswers] = useState("");
     setLoading(true);
 
     try {
+      const feature = await createFeatureRequest(
+  title,
+  description,
+  "YOUR_PROJECT_ID"
+);
+
+setFeatureId(feature.id);
       const finalDescription =
         questions && questions !== "READY_FOR_PRD"
           ? `${description}

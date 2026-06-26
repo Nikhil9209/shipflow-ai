@@ -1,6 +1,8 @@
 import { prisma } from "../../../../lib/prisma";
 import Link from "next/link";
-
+import DeleteProjectButton from "../../../../components/DeleteProjectButton";
+import EditProjectForm from "../../../../components/EditProjectForm";
+import FeatureRequestForm from "../../../../components/FeatureRequestForm";
 type Props = {
   params: Promise<{
     projectId: string;
@@ -43,6 +45,19 @@ export default async function ProjectDetailsPage({
       <p className="mt-2 text-slate-400">
         {project.description}
       </p>
+      <div className="mt-6 flex gap-4">
+
+  <EditProjectForm
+    projectId={project.id}
+    initialName={project.name}
+    initialDescription={project.description ?? ""}
+  />
+
+  <DeleteProjectButton
+    projectId={project.id}
+  />
+
+</div>
 
       <Link
         href={`/feature-requests?projectId=${project.id}`}
@@ -53,7 +68,17 @@ export default async function ProjectDetailsPage({
       </Link>
 
       <div className="mt-10">
+    <div className="mt-10 rounded-xl bg-slate-900 p-6">
 
+  <h2 className="mb-6 text-2xl font-bold">
+    New Feature Request
+  </h2>
+
+  <FeatureRequestForm
+    projectId={project.id}
+  />
+
+</div>
         <h2 className="mb-4 text-2xl font-bold">
           Feature Requests
         </h2>
@@ -64,20 +89,28 @@ export default async function ProjectDetailsPage({
           </div>
         ) : (
           <div className="space-y-4">
-            {project.featureRequests.map((feature) => (
-              <div
-                key={feature.id}
-                className="rounded-xl bg-slate-900 p-6"
-              >
-                <h3 className="text-xl font-semibold">
-                  {feature.title}
-                </h3>
+{project.featureRequests.map((feature) => (
+  <Link
+    key={feature.id}
+    href={`/features/${feature.id}`}
+  >
+    <div className="rounded-xl bg-slate-900 p-6 transition hover:bg-slate-800 cursor-pointer">
 
-                <p className="mt-2 text-slate-400">
-                  {feature.description}
-                </p>
-              </div>
-            ))}
+      <h3 className="text-xl font-semibold">
+        {feature.title}
+      </h3>
+
+      <p className="mt-2 text-slate-400">
+        {feature.description}
+      </p>
+
+      <div className="mt-4 text-sm text-blue-400">
+        Open Feature →
+      </div>
+
+    </div>
+  </Link>
+))}
           </div>
         )}
 
