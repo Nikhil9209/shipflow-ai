@@ -54,7 +54,7 @@ const latestPRD = await getLatestPRD(
   currentPRD.featureRequestId
 );
 
-return await prisma.pRD.create({
+const newPRD = await prisma.pRD.create({
   data: {
     title,
     content,
@@ -65,6 +65,24 @@ return await prisma.pRD.create({
     featureRequestId: currentPRD.featureRequestId,
   },
 });
+const oldTasks = await prisma.task.findMany({
+  where: {
+    prdId: currentPRD.id,
+  },
+});
+if (oldTasks.length > 0) {
+  await prisma.task.createMany({
+    data: oldTasks.map((task) => ({
+      title: task.title,
+      description: task.description,
+      status: task.status,
+      priority: task.priority,
+      prdId: newPRD.id,
+    })),
+  });
+}
+
+return newPRD;
 }
 export async function getPRDById(
   prdId: string

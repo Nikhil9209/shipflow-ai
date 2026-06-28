@@ -29,3 +29,25 @@ export async function updateTask(
     },
   });
 }
+export async function deleteTask(
+  taskId: string
+) {
+  await prisma.task.delete({
+    where: {
+      id: taskId,
+    },
+  });
+}
+export async function updateTaskStatus(
+  taskId: string,
+  status: string
+) {
+  return await prisma.task.update({
+    where: {
+      id: taskId,
+    },
+    data: {
+      status,
+    },
+  });
+}

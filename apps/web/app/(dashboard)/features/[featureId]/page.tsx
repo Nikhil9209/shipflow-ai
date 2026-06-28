@@ -6,6 +6,9 @@ import Link from "next/link";
 import VersionHistory from "../../../../components/VersionHistory";
 import { restorePRDAction } from "../../../../actions/prd";
 import EditTaskForm from "../../../../components/EditTaskForm";
+import DeleteTaskButton from "../../../../components/DeleteTaskButton";
+import TaskStatusSelect from "../../../../components/TaskStatusSelect";
+import KanbanBoard from "../../../../components/KanbanBoard";
 type Props = {
   params: Promise<{
     featureId: string;
@@ -44,6 +47,7 @@ prds: {
       </div>
     );
   }
+  
 const selectedPrd = version
   ? feature.prds.find(
       (prd) => prd.version === Number(version)
@@ -51,6 +55,13 @@ const selectedPrd = version
   : feature.prds.at(0);
 
 const latestPrd = selectedPrd ?? feature.prds.at(0);
+
+console.log(
+  latestPrd?.tasks.map((task) => ({
+    title: task.title,
+    status: task.status,
+  }))
+);
   return (
     <div className="p-8">
 
@@ -134,21 +145,38 @@ const latestPrd = selectedPrd ?? feature.prds.at(0);
       {task.title}
     </h3>
 
-    <p className="mb-4 text-sm text-slate-400">
-      Status: {task.status}
-    </p>
+          <div className="mb-4">
+  <p className="mb-2 text-sm text-slate-400">
+    Status
+  </p>
+
+  <TaskStatusSelect
+    taskId={task.id}
+    currentStatus={task.status}
+  />
+</div>
 
     <EditTaskForm
       taskId={task.id}
       initialTitle={task.title}
       initialDescription={task.description}
     />
+    <div className="mt-4">
+  <DeleteTaskButton
+    taskId={task.id}
+  />
+</div>
   </div>
 ))}
 
       </div>
 
     </div>
+)}
+{latestPrd && latestPrd.tasks.length > 0 && (
+  <KanbanBoard
+    tasks={latestPrd.tasks}
+  />
 )}
 {feature.prds.length > 1 && (
   <div className="mt-10">
